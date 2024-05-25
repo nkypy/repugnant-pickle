@@ -176,6 +176,7 @@ impl RepugnantTorchTensors {
         let (vals, _memo) = evaluate(&ops, true)?;
         let val = match vals.as_slice() {
             [Value::Build(a, _), ..] => a.as_ref(),
+            [Value::Seq(SequenceType::Dict, a)] if a.len() == 1 => &a[0], // RWKV state support
             _ => bail!("Unexpected toplevel type"),
         };
         // Presumably this is usually going to be an OrderedDict, but maybe
@@ -192,6 +193,7 @@ impl RepugnantTorchTensors {
                 _ => bail!("Unexpected type in toplevel Global"),
             },
             Value::Seq(SequenceType::Dict, seq) => seq,
+            Value::Seq(SequenceType::Tuple, seq) => seq, // RWKV state support
             _ => bail!("Unexpected type in Build"),
         };
         let mut tensors = Vec::with_capacity(16);
